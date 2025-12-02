@@ -13,7 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Client Server Photo Verification",
+  title: "Client Server TCP",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
