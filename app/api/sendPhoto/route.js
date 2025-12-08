@@ -1,7 +1,7 @@
 export const runtime = "nodejs";
 import net from "net";
 
-export async function POST(req: Request) {
+export async function POST(req) {
   try {
     const { fileBase64 } = await req.json();
     // Validate input
