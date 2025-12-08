@@ -2,15 +2,25 @@
 
 import { useState } from "react";
 
+interface ServerResponse {
+  fileSizeBytes: number;
+  sha256: string;
+  status: string;
+  server: {
+    fileSizeBytes: number;
+    sha256: string;
+  };
+}
+
 export default function Home() {
   const [status, setStatus] = useState("idle");
-  const [preview, setPreview] = useState(null);
-  const [serverData, setServerData] = useState(null);
-  const [clientHash, setClientHash] = useState(null);
-  const [hashMatch, setHashMatch] = useState(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [serverData, setServerData] = useState<ServerResponse | null>(null);
+  const [clientHash, setClientHash] = useState<string | null>(null);
+  const [hashMatch, setHashMatch] = useState<boolean | null>(null);
 
   // Utility to format bytes
-  function formatBytes(bytes, decimals = 2) {
+  function formatBytes(bytes: number, decimals: number = 2) {
     if (bytes === 0) return "0 bytes";
 
     const k = 1024;
@@ -22,15 +32,16 @@ export default function Home() {
   }
 
   // Utility to compute SHA-256 hash of a file
-  async function hashFileSHA256(file) {
+  async function hashFileSHA256(file: File) {
     const arrayBuffer = await file.arrayBuffer();
     const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
     return btoa(String.fromCharCode(...new Uint8Array(hashBuffer))); // Base64 like server
   }
 
-  async function handleUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || !files[0]) return;
+    const file = files[0];
 
     setStatus("uploading");
     setServerData(null);
@@ -45,7 +56,8 @@ export default function Home() {
 
     const reader = new FileReader();
     reader.onload = async () => {
-      const base64 = reader.result.split(",")[1];
+      if (!reader.result) return;
+      const base64 = (reader.result as string).split(",")[1];
 
       const res = await fetch("/api/sendPhoto", {
         method: "POST",
